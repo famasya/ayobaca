@@ -5,7 +5,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { createQuery } from '@tanstack/svelte-query';
-	import { Book as BookIcon, Home } from 'lucide-svelte';
+	import { Book as BookIcon, Captions, Home } from 'lucide-svelte';
 	import type { Book } from '../../../../../types';
 	const { slug, id, page: openPage } = $page.params;
 	const lang = $page.url.searchParams.get('lang') ?? '6260074016145408';
@@ -15,6 +15,8 @@
 		next: openPage ? parseInt(openPage) + 1 : 1,
 		prev: openPage ? parseInt(openPage) - 1 : -1
 	};
+
+	$: caption = true;
 
 	const query = createQuery<Book>({
 		queryKey: ['book-content'],
@@ -49,7 +51,7 @@
 </script>
 
 <svelte:head>
-	<title>Baca Buku {$query.data?.name ?? 'Memuat...'}</title>
+	<title>{$query.data?.name ?? 'Memuat...'}</title>
 
 	{#each preloadImageUrls as imageUrl}
 		<link rel="preload" as="image" href={imageUrl} />
@@ -80,6 +82,11 @@
 							>
 						</div>
 					</DropdownMenu.Item>
+					<DropdownMenu.Item>
+						<Button variant="default" class="h-7 text-xs" on:click={() => (caption = !caption)}
+							><Captions class="h-4" /> {caption ? 'Sembunyikan' : 'Munculkan'} caption</Button
+						>
+					</DropdownMenu.Item>
 				</DropdownMenu.Group>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root></span
@@ -108,11 +115,12 @@
 					<div>
 						<h1 class="text-3xl font-semibold text-white">{$query.data.name}</h1>
 						<h4 class="text-md mb-4 text-white">
-							Oleh {$query.data.contributingUsers.join(', ')}, {$query.data.totalPages} halaman
+							Oleh {$query.data.collaboratorsByRole.AUTHOR.map((author) => author.name).join(', ')}, {$query
+								.data.totalPages} halaman
 						</h4>
 					</div>
 					<Button variant="outline" size="lg" on:click={() => navigateTo('next')}
-						><BookIcon class="mr-2 h-6" /> BUKA BUKU</Button
+						><BookIcon class="mr-2 h-6" /> Mulai Baca</Button
 					>
 				</div>
 			{:else}
@@ -123,7 +131,9 @@
 						>
 					</div>
 					<div class="mx-2 grow rounded bg-black bg-opacity-50 text-{fontSize} text-white">
-						{@html $query.data.pages[pageState.current - 1].extractedLongContentValue}
+						{#if caption}
+							{@html $query.data.pages[pageState.current - 1].extractedLongContentValue}
+						{/if}
 					</div>
 					<div class="flex-none">
 						{#if pageState.current !== $query.data.pages.length - 1}

@@ -7,12 +7,21 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
 	import { createQuery } from '@tanstack/svelte-query';
+	import { Book, ExternalLink, Loader } from 'lucide-svelte';
 	import { writable } from 'svelte/store';
 	import type { SearchResult } from '../types';
 	let searchTerm = '';
 	$: cursor = '0';
 
 	let timer: ReturnType<typeof setTimeout>;
+	const setSearchKeyword = (term: string) => {
+		clearTimeout(timer);
+		timer = setTimeout(async () => {
+			searchTerm = term;
+			cursor = '0';
+		}, 500);
+	};
+
 	const searchResults = writable<SearchResult['other']>([]);
 
 	$: search = createQuery<SearchResult>({
@@ -38,20 +47,26 @@
 </script>
 
 <svelte:head>
-	<title>Baca Buku</title>
+	<title>Ayo Baca</title>
 </svelte:head>
 
 <div class="mx-auto mb-8 flex max-w-2xl flex-col px-2 py-4">
-	<h1 class="mx-2 mb-2 text-xl font-semibold">Cari Buku</h1>
+	<span class="mb-4 flex flex-row items-center justify-center">
+		<Book class="h-8" />
+		<h1 class="mx-2 inline text-xl">Ayo Baca</h1>
+	</span>
 	<Input
 		placeholder="Ketikkan sesuatu..."
-		bind:value={searchTerm}
+		on:keyup={(e) => {
+			setSearchKeyword(e.currentTarget.value);
+		}}
 		class="h-12 border border-2 border-green-600 shadow shadow-md focus:outline-none"
 	/>
 
 	{#if $search.isLoading}
-		<div class="mt-4 text-center">
-			<p>Mencari...</p>
+		<div class="mt-4 flex flex-row items-center justify-center gap-2 p-4">
+			<Loader />
+			<span> Loading </span>
 		</div>
 	{:else if $search.isError}
 		<p>Error: {$search.error.message}</p>
@@ -67,7 +82,7 @@
 						>
 							<img src={result.thumborCoverImageUrl} alt={result.name} class="h-48 object-cover" />
 							<div
-								class="absolute bottom-0 left-0 right-0 rounded-b bg-gradient-to-b from-transparent to-black/40 p-2 pt-10 font-semibold text-white"
+								class="absolute bottom-0 left-0 right-0 rounded-b bg-gradient-to-b from-transparent to-black/70 p-2 pt-10 font-semibold text-white"
 							>
 								<p>{result.name}</p>
 							</div>
@@ -97,7 +112,8 @@
 										Origin URL : <a
 											href={`https://www.letsreadasia.org/book/${result.masterBookId}?bookLang=6260074016145408`}
 											target="_blank"
-											rel="noreferrer"><Badge>Let's Read Asia</Badge></a
+											rel="noreferrer"
+											><Badge>Let's Read Asia <ExternalLink class="ml-2 h-4" /></Badge></a
 										>
 									</p>
 								</Drawer.Description>
@@ -132,7 +148,7 @@
 									<div class="w-2/3">
 										<Button
 											href="/read/{slug}/{result.masterBookId}?lang={selectedLang.value}"
-											class="w-full">Mulai Baca</Button
+											class="w-full">Buka Buku</Button
 										>
 									</div>
 								</div>
