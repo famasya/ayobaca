@@ -66,24 +66,33 @@
 			>
 			<DropdownMenu.Content>
 				<DropdownMenu.Group>
-					<DropdownMenu.Item href="/" class="py-2"
+					<DropdownMenu.Item href="/" class="cursor-pointer py-2 text-sm"
 						><Home class="mr-2 h-4" /> Kembali ke Beranda</DropdownMenu.Item
 					>
 					<DropdownMenu.Item class="py-2">
 						<div class="flex flex-row items-center justify-center gap-2">
-							<Button variant="default" class="h-7 text-xs" on:click={() => (fontSize = 'sm')}
-								>Kecil</Button
+							<Button
+								variant="default"
+								class="h-7 bg-green-700 text-sm"
+								on:click={() => (fontSize = 'sm')}>Kecil</Button
 							>
-							<Button variant="default" class="h-7 text-xs" on:click={() => (fontSize = 'md')}
-								>Sedang</Button
+							<Button
+								variant="default"
+								class="h-7 bg-green-700 text-sm"
+								on:click={() => (fontSize = 'md')}>Sedang</Button
 							>
-							<Button variant="default" class="h-7 text-xs" on:click={() => (fontSize = 'lg')}
-								>Besar</Button
+							<Button
+								variant="default"
+								class="h-7 bg-green-700 text-sm"
+								on:click={() => (fontSize = 'lg')}>Besar</Button
 							>
 						</div>
 					</DropdownMenu.Item>
 					<DropdownMenu.Item>
-						<Button variant="default" class="h-7 text-xs" on:click={() => (caption = !caption)}
+						<Button
+							variant="default"
+							class="h-7 bg-green-700 text-sm"
+							on:click={() => (caption = !caption)}
 							><Captions class="h-4" /> {caption ? 'Sembunyikan' : 'Munculkan'} caption</Button
 						>
 					</DropdownMenu.Item>
@@ -123,7 +132,7 @@
 				<div class="mx-auto flex max-w-lg items-center px-4 py-2">
 					<div class="flex-none">
 						<Button variant="outline" on:click={() => navigateTo('prev')}
-							>{pageState.current === 1 ? 'Sampul' : `Hal ${pageState.prev}`}</Button
+							>{pageState.current === 1 ? 'Sampul' : `Hal. ${pageState.prev}`}</Button
 						>
 					</div>
 					<div class="mx-2 grow rounded bg-black bg-opacity-50 text-{fontSize} text-white">
@@ -134,7 +143,7 @@
 					<div class="flex-none">
 						{#if pageState.current !== $query.data.pages.length - 1}
 							<Button variant="outline" on:click={() => navigateTo('next')}
-								>Hal {pageState.next}</Button
+								>Hal. {pageState.next}</Button
 							>
 						{/if}
 					</div>

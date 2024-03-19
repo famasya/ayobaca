@@ -7,7 +7,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
 	import { createQuery } from '@tanstack/svelte-query';
-	import { Book, ExternalLink, Loader } from 'lucide-svelte';
+	import { BookA, ExternalLink, Loader } from 'lucide-svelte';
 	import { writable } from 'svelte/store';
 	import type { SearchResult } from '../types';
 	let searchTerm = '';
@@ -58,10 +58,16 @@
 </svelte:head>
 
 <div class="mx-auto mb-8 flex max-w-2xl flex-col px-2 py-4">
-	<span class="mb-4 flex flex-row items-center justify-center">
-		<Book class="h-8" />
-		<h1 class="mx-2 inline text-xl">Ayo Baca</h1>
-	</span>
+	<div class="mb-4 flex flex-col items-center justify-center">
+		<span class="flex flex-row">
+			<BookA class="h-8" />
+			<h1 class="mx-2 inline text-2xl">Ayo Baca</h1>
+		</span>
+		<span
+			class="max-w-1/3 border-1 mt-1 rounded border border-green-600 bg-green-50 px-4 text-green-800"
+			>Baca cerita dari LetsReadAsia</span
+		>
+	</div>
 	<Input
 		placeholder="Ketikkan sesuatu..."
 		on:keyup={(e) => {
@@ -130,7 +136,9 @@
 											href={`https://www.letsreadasia.org/book/${result.masterBookId}?bookLang=6260074016145408`}
 											target="_blank"
 											rel="noreferrer"
-											><Badge>Let's Read Asia <ExternalLink class="ml-2 h-4" /></Badge></a
+											><Badge class="bg-green-700"
+												>Let's Read Asia <ExternalLink class="ml-2 h-4" /></Badge
+											></a
 										>
 									</p>
 								</Drawer.Description>
@@ -165,7 +173,7 @@
 									<div class="w-2/3">
 										<Button
 											href="/read/{slug}/{result.masterBookId}?lang={selectedLang.value}"
-											class="w-full">Buka Buku</Button
+											class="w-full bg-green-700">Buka Buku</Button
 										>
 									</div>
 								</div>
@@ -176,9 +184,9 @@
 			{/each}
 		</div>
 		<Button
-			class="bg-green-700 hover:bg-green-600"
+			class="bg-green-700 hover:bg-green-700"
 			on:click={() => (cursor = $search.data?.cursorWebSafeString ?? '0')}
-			disabled={$search.isLoading}>{$search.isLoading ? 'Memuat...' : 'Muat lagi'}</Button
+			disabled={$search.isLoading}>{$search.isLoading ? 'Memuat...' : 'Selanjutnya'}</Button
 		>
 	{/if}
 </div>
