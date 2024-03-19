@@ -30,7 +30,7 @@
 		queryFn: async () => {
 			const results = (await (
 				await fetch(
-					`https://letsreadasia.org/api/book/elastic/search/?searchText=${searchTerm}&lId=6260074016145408&limit=18&cursor=${cursor}`
+					`https://letsreadasia.org/api/book/elastic/search/?searchText=${searchTerm}&lId=6260074016145408&limit=24&cursor=${cursor}`
 				)
 			).json()) as SearchResult;
 
@@ -89,7 +89,7 @@
 		<p>Error: {$search.error.message}</p>
 	{/if}
 	{#if $searchResults.length > 0}
-		<div class="mb-4 mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+		<div class="mb-4 mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4">
 			{#each $searchResults as result}
 				{@const slug = result.name.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}
 				<Drawer.Root>
@@ -184,13 +184,19 @@
 			{/each}
 		</div>
 		<Button
-			class="bg-green-700 hover:bg-green-700"
+			class="bg-green-700 shadow hover:bg-green-800"
 			on:click={() => (cursor = $search.data?.cursorWebSafeString ?? '0')}
 			disabled={$search.isLoading}>{$search.isLoading ? 'Memuat...' : 'Selanjutnya'}</Button
 		>
 	{/if}
 	<div class="mt-2 flex flex-row items-center justify-center text-xs">
-		<Button variant="outline" size="sm" href="https://github.com/famasya/ayobaca" target="_blank">
+		<Button
+			variant="outline"
+			class="shadow"
+			size="sm"
+			href="https://github.com/famasya/ayobaca"
+			target="_blank"
+		>
 			<Github class="h-4" /> <span>Kode Sumber</span>
 		</Button>
 	</div>

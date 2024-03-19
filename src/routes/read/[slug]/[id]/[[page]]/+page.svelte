@@ -62,7 +62,7 @@
 	<span class="absolute left-2 top-2">
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger>
-				<Button variant="outline" size="sm">Menu</Button></DropdownMenu.Trigger
+				<Button variant="outline" size="sm" class="shadow">Menu</Button></DropdownMenu.Trigger
 			>
 			<DropdownMenu.Content>
 				<DropdownMenu.Group>
@@ -73,17 +73,17 @@
 						<div class="flex flex-row items-center justify-center gap-2">
 							<Button
 								variant="default"
-								class="h-7 bg-green-700 text-sm"
+								class="h-7 bg-green-700 text-sm shadow"
 								on:click={() => (fontSize = 'sm')}>Kecil</Button
 							>
 							<Button
 								variant="default"
-								class="h-7 bg-green-700 text-sm"
+								class="h-7 bg-green-700 text-sm shadow"
 								on:click={() => (fontSize = 'md')}>Sedang</Button
 							>
 							<Button
 								variant="default"
-								class="h-7 bg-green-700 text-sm"
+								class="h-7 bg-green-700 text-sm shadow"
 								on:click={() => (fontSize = 'lg')}>Besar</Button
 							>
 						</div>
@@ -91,7 +91,7 @@
 					<DropdownMenu.Item>
 						<Button
 							variant="default"
-							class="h-7 bg-green-700 text-sm"
+							class="h-7 bg-green-700 text-sm shadow"
 							on:click={() => (caption = !caption)}
 							><Captions class="h-4" /> {caption ? 'Sembunyikan' : 'Munculkan'} caption</Button
 						>
@@ -124,14 +124,14 @@
 								.data.totalPages} halaman
 						</h4>
 					</div>
-					<Button variant="outline" size="lg" on:click={() => navigateTo('next')}
+					<Button variant="outline" size="lg" class="shadow" on:click={() => navigateTo('next')}
 						><BookIcon class="mr-2 h-6" /> Mulai Baca</Button
 					>
 				</div>
 			{:else}
 				<div class="mx-auto flex max-w-lg items-center px-4 py-2">
 					<div class="flex-none">
-						<Button variant="outline" on:click={() => navigateTo('prev')}
+						<Button variant="outline" class="shadow" on:click={() => navigateTo('prev')}
 							>{pageState.current === 1 ? 'Sampul' : `Hal. ${pageState.prev}`}</Button
 						>
 					</div>
@@ -142,7 +142,7 @@
 					</div>
 					<div class="flex-none">
 						{#if pageState.current !== $query.data.pages.length - 1}
-							<Button variant="outline" on:click={() => navigateTo('next')}
+							<Button variant="outline" class="shadow" on:click={() => navigateTo('next')}
 								>Hal. {pageState.next}</Button
 							>
 						{/if}
