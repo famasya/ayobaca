@@ -11,18 +11,19 @@
 	import { writable } from 'svelte/store';
 	import type { SearchResult } from '../types';
 	let searchTerm = '';
+	let previousSearch: string | null = null;
 	$: cursor = '0';
+	const searchResults = writable<SearchResult['other']>([]);
 
 	let timer: ReturnType<typeof setTimeout>;
 	const setSearchKeyword = (term: string) => {
 		clearTimeout(timer);
 		timer = setTimeout(async () => {
+			searchResults.set([]);
 			searchTerm = term;
 			cursor = '0';
 		}, 500);
 	};
-
-	const searchResults = writable<SearchResult['other']>([]);
 
 	$: search = createQuery<SearchResult>({
 		queryKey: ['search', searchTerm, cursor],
@@ -33,7 +34,13 @@
 				)
 			).json()) as SearchResult;
 
-			searchResults.update((current) => [...current, ...results.other]);
+			if (previousSearch !== searchTerm) {
+				searchResults.set([...results.other]);
+			} else {
+				searchResults.update((current) => [...current, ...results.other]);
+			}
+
+			previousSearch = searchTerm;
 
 			return results;
 		},
@@ -63,6 +70,10 @@
 		class="h-12 border border-2 border-green-600 shadow shadow-md focus:outline-none"
 	/>
 
+	{#if searchTerm.length > 0}
+		<h4 class="mt-4 font-semibold">Hasil pencarian <Badge>{searchTerm}</Badge></h4>
+	{/if}
+
 	{#if $search.isLoading}
 		<div class="mt-4 flex flex-row items-center justify-center gap-2 p-4">
 			<Loader />
@@ -78,9 +89,15 @@
 				<Drawer.Root>
 					<Drawer.Trigger>
 						<Card
+							id={slug}
 							class="relative flex h-full flex-col items-center justify-center text-center shadow"
 						>
-							<img src={result.thumborCoverImageUrl} alt={result.name} class="h-48 object-cover" />
+							<img
+								id={`${slug}-cover`}
+								src={result.thumborCoverImageUrl}
+								alt={result.name}
+								class="h-48 object-cover"
+							/>
 							<div
 								class="absolute bottom-0 left-0 right-0 rounded-b bg-gradient-to-b from-transparent to-black/70 p-2 pt-10 font-semibold text-white"
 							>
