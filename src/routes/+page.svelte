@@ -59,7 +59,7 @@
 	{#if $searchResults.length > 0}
 		<div class="mb-4 mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
 			{#each $searchResults as result}
-				{@const slug = result.name.replaceAll(' ', '-').toLowerCase()}
+				{@const slug = result.name.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}
 				<Drawer.Root>
 					<Drawer.Trigger>
 						<Card
