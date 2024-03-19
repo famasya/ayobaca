@@ -97,15 +97,11 @@
 		<p>Error: {$query.error.message}</p>
 	{:else if $query.data}
 		{#if pageState.current === 0}
-			<img
-				class="h-full object-contain"
-				src={$query.data.coverImageServingUrl}
-				alt={$query.data.name}
-			/>
+			<img class="h-full object-contain" src={$query.data.coverImageUrl} alt={$query.data.name} />
 		{:else}
 			<img
 				class="h-full object-contain"
-				src={$query.data.pages[pageState.current - 1].imageServingUrl}
+				src={$query.data.pages[pageState.current - 1].imageUrl}
 				alt={$query.data.pages[pageState.current - 1].alttext}
 			/>
 		{/if}
