@@ -5,6 +5,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { createQuery } from '@tanstack/svelte-query';
+	import { Book as BookIcon, Home } from 'lucide-svelte';
 	import type { Book } from '../../../../../types';
 	const { slug, id, page: openPage } = $page.params;
 	const lang = $page.url.searchParams.get('lang') ?? '6260074016145408';
@@ -63,16 +64,18 @@
 			>
 			<DropdownMenu.Content>
 				<DropdownMenu.Group>
-					<DropdownMenu.Item href="/">Kembali ke Beranda</DropdownMenu.Item>
+					<DropdownMenu.Item href="/" class="py-2"
+						><Home class="mr-2 h-4" /> Kembali ke Beranda</DropdownMenu.Item
+					>
 					<DropdownMenu.Item class="py-2">
 						<div class="flex flex-row items-center justify-center gap-2">
-							<Button variant="default" class="h-8 text-xs" on:click={() => (fontSize = 'sm')}
+							<Button variant="default" class="h-7 text-xs" on:click={() => (fontSize = 'sm')}
 								>Kecil</Button
 							>
-							<Button variant="default" class="h-8 text-xs" on:click={() => (fontSize = 'md')}
+							<Button variant="default" class="h-7 text-xs" on:click={() => (fontSize = 'md')}
 								>Sedang</Button
 							>
-							<Button variant="default" class="h-8 text-xs" on:click={() => (fontSize = 'lg')}
+							<Button variant="default" class="h-7 text-xs" on:click={() => (fontSize = 'lg')}
 								>Besar</Button
 							>
 						</div>
@@ -103,9 +106,14 @@
 			{#if pageState.current === 0}
 				<div class="mt-10 bg-gradient-to-b from-black/40 to-black/80 p-4">
 					<div>
-						<h1 class="mb-2 text-3xl font-semibold text-white">{$query.data.name}</h1>
+						<h1 class="text-3xl font-semibold text-white">{$query.data.name}</h1>
+						<h4 class="text-md mb-4 text-white">
+							Oleh {$query.data.contributingUsers.join(', ')}, {$query.data.totalPages} halaman
+						</h4>
 					</div>
-					<Button variant="outline" size="lg" on:click={() => navigateTo('next')}>Mulai</Button>
+					<Button variant="outline" size="lg" on:click={() => navigateTo('next')}
+						><BookIcon class="mr-2 h-6" /> BUKA BUKU</Button
+					>
 				</div>
 			{:else}
 				<div class="mx-auto flex max-w-lg items-center px-4 py-2">

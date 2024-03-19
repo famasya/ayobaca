@@ -7,22 +7,27 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
 	import { createQuery } from '@tanstack/svelte-query';
+	import { writable } from 'svelte/store';
 	import type { SearchResult } from '../types';
 	let searchTerm = '';
 	$: cursor = '0';
 
 	let timer: ReturnType<typeof setTimeout>;
+	const searchResults = writable<SearchResult['other']>([]);
 
-	const search = createQuery<SearchResult>({
+	$: search = createQuery<SearchResult>({
 		queryKey: ['search', searchTerm, cursor],
 		queryFn: async () => {
-			return await (
+			const results = (await (
 				await fetch(
 					`https://letsreadasia.org/api/book/elastic/search/?searchText=${searchTerm}&lId=6260074016145408&limit=18&cursor=${cursor}`
 				)
-			).json();
-		},
+			).json()) as SearchResult;
 
+			searchResults.update((current) => [...current, ...results.other]);
+
+			return results;
+		},
 		enabled: browser
 	});
 
@@ -50,9 +55,10 @@
 		</div>
 	{:else if $search.isError}
 		<p>Error: {$search.error.message}</p>
-	{:else if $search.data}
+	{/if}
+	{#if $searchResults.length > 0}
 		<div class="mb-4 mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
-			{#each $search.data.other as result}
+			{#each $searchResults as result}
 				{@const slug = result.name.replaceAll(' ', '-').toLowerCase()}
 				<Drawer.Root>
 					<Drawer.Trigger>
@@ -137,9 +143,9 @@
 			{/each}
 		</div>
 		<Button
-			class="bg-green-700"
-			on:click={() => $search.data && (cursor = $search.data?.cursorWebSafeString)}
-			>Muat lagi</Button
+			class="bg-green-700 hover:bg-green-600"
+			on:click={() => (cursor = $search.data?.cursorWebSafeString ?? '0')}
+			disabled={$search.isLoading}>{$search.isLoading ? 'Memuat...' : 'Muat lagi'}</Button
 		>
 	{/if}
 </div>
