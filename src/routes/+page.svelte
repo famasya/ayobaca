@@ -7,7 +7,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
 	import { createQuery } from '@tanstack/svelte-query';
-	import { BookA, ExternalLink, Loader } from 'lucide-svelte';
+	import { BookA, ExternalLink, Github, Loader } from 'lucide-svelte';
 	import { writable } from 'svelte/store';
 	import type { SearchResult } from '../types';
 	let searchTerm = '';
@@ -189,4 +189,9 @@
 			disabled={$search.isLoading}>{$search.isLoading ? 'Memuat...' : 'Selanjutnya'}</Button
 		>
 	{/if}
+	<div class="mt-2 flex flex-row items-center justify-center text-xs">
+		<Button variant="outline" size="sm" href="https://github.com/famasya/ayobaca" target="_blank">
+			<Github class="h-4" /> <span>Kode Sumber</span>
+		</Button>
+	</div>
 </div>
