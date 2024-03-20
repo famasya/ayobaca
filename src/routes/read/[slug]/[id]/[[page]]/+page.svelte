@@ -6,7 +6,9 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { createQuery } from '@tanstack/svelte-query';
 	import { Book as BookIcon, Captions, Home } from 'lucide-svelte';
+	import { swipe } from 'svelte-gestures';
 	import type { Book } from '../../../../../types';
+
 	const { slug, id, page: openPage } = $page.params;
 	const lang = $page.url.searchParams.get('lang') ?? '6260074016145408';
 
@@ -48,6 +50,16 @@
 	};
 
 	$: fontSize = 'lg';
+
+	const swipeHandler = (event: any) => {
+		const direction = event.detail.direction;
+		if (direction === 'left') {
+			navigateTo('next');
+		}
+		if (direction === 'right') {
+			navigateTo('prev');
+		}
+	};
 </script>
 
 <svelte:head>
@@ -58,8 +70,12 @@
 	{/each}
 </svelte:head>
 
-<div class="relative flex h-dvh items-center justify-center">
-	<span class="absolute left-2 top-2">
+<div
+	class="relative flex h-dvh items-center justify-center"
+	use:swipe={{ timeframe: 300, minSwipeDistance: 60 }}
+	on:swipe={swipeHandler}
+>
+	<div class="absolute left-2 top-2">
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger>
 				<Button variant="outline" size="sm" class="shadow">Menu</Button></DropdownMenu.Trigger
@@ -98,8 +114,9 @@
 					</DropdownMenu.Item>
 				</DropdownMenu.Group>
 			</DropdownMenu.Content>
-		</DropdownMenu.Root></span
-	>
+		</DropdownMenu.Root>
+	</div>
+
 	{#if $query.isLoading}
 		<p>Memuat...</p>
 	{:else if $query.isError}
@@ -127,6 +144,9 @@
 					<Button variant="outline" size="lg" class="shadow" on:click={() => navigateTo('next')}
 						><BookIcon class="mr-2 h-6" /> Mulai Baca</Button
 					>
+					<p class="mt-2 text-xs text-white">
+						Tip: Anda juga dapat menggunakan swipe untuk navigasi halaman
+					</p>
 				</div>
 			{:else}
 				<div class="mx-auto flex max-w-lg items-center px-4 py-2">

@@ -41,6 +41,7 @@
 		"bits-ui": "^0.19.7",
 		"clsx": "^2.1.0",
 		"lucide-svelte": "^0.357.0",
+		"svelte-gestures": "^4.0.0",
 		"tailwind-merge": "^2.2.1",
 		"tailwind-variants": "^0.2.0",
 		"vaul-svelte": "^0.3.0"

@@ -10,4 +10,5 @@ declare global {
 	}
 }
 
+/// <reference types="svelte-gestures" />
 export {};
