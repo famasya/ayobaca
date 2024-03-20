@@ -80,7 +80,7 @@
 		<h4 class="mt-4 font-semibold">Hasil pencarian <Badge>{searchTerm}</Badge></h4>
 	{/if}
 
-	{#if $search.isLoading}
+	{#if $search.isLoading || $searchResults.length === 0}
 		<div class="mt-4 flex flex-row items-center justify-center gap-2 p-4">
 			<Loader />
 			<span> Memuat </span>
