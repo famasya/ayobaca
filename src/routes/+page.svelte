@@ -83,7 +83,7 @@
 	{#if $search.isLoading}
 		<div class="mt-4 flex flex-row items-center justify-center gap-2 p-4">
 			<Loader />
-			<span> Loading </span>
+			<span> Memuat </span>
 		</div>
 	{:else if $search.isError}
 		<p>Error: {$search.error.message}</p>

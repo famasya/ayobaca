@@ -7,10 +7,12 @@
 	import { createQuery } from '@tanstack/svelte-query';
 	import { Book as BookIcon, Captions, Home } from 'lucide-svelte';
 	import { swipe } from 'svelte-gestures';
+	import { writable } from 'svelte/store';
 	import type { Book } from '../../../../../types';
 
 	const { slug, id, page: openPage } = $page.params;
 	const lang = $page.url.searchParams.get('lang') ?? '6260074016145408';
+	const bookContent = writable<Book>();
 
 	let pageState = {
 		current: openPage ? parseInt(openPage) : 0,
@@ -18,18 +20,23 @@
 		prev: openPage ? parseInt(openPage) - 1 : -1
 	};
 
-	$: caption = true;
-
-	const query = createQuery<Book>({
+	$: query = createQuery<Book>({
 		queryKey: ['book-content'],
-		queryFn: async () =>
-			await (
+		queryFn: async () => {
+			const content = (await (
 				await fetch(`https://letsreadasia.org/api/v5/book/preview/language/${lang}/book/${id}`)
-			).json(),
+			).json()) as Book;
+
+			bookContent.set(content);
+
+			return content;
+		},
 		enabled: browser
 	});
 
 	$: preloadImageUrls = $query.data?.pages.map((page) => page.imageUrl) ?? [];
+	$: caption = true;
+	$: fontSize = 'lg';
 
 	const navigateTo = (state: 'next' | 'prev') => {
 		const openPage = pageState.current + (state === 'next' ? 1 : -1);
@@ -48,8 +55,6 @@
 			};
 		}
 	};
-
-	$: fontSize = 'lg';
 
 	const swipeHandler = (event: any) => {
 		if ($query.data) {
@@ -119,28 +124,35 @@
 		</DropdownMenu.Root>
 	</div>
 
-	{#if $query.isLoading}
-		<p>Memuat...</p>
-	{:else if $query.isError}
+	{#if $query.isError}
 		<p>Error: {$query.error.message}</p>
-	{:else if $query.data}
+	{:else if $bookContent === undefined}
+		<p>Memuat...</p>
+	{:else}
 		{#if pageState.current === 0}
-			<img class="h-full object-contain" src={$query.data.coverImageUrl} alt={$query.data.name} />
+			<img
+				class="h-full object-contain"
+				id="cover-{slug}-{pageState.current}"
+				src={$bookContent.coverImageUrl}
+				alt={$bookContent.name}
+			/>
 		{:else}
 			<img
 				class="h-full object-contain"
-				src={$query.data.pages[pageState.current - 1].imageUrl}
-				alt={$query.data.pages[pageState.current - 1].alttext}
+				id="content-{slug}-{pageState.current}"
+				src={$bookContent.pages[pageState.current - 1].imageUrl}
+				alt={$bookContent.pages[pageState.current - 1].alttext}
 			/>
 		{/if}
 		<div class="absolute bottom-0 left-0 w-full text-center">
 			{#if pageState.current === 0}
 				<div class="mt-10 bg-gradient-to-b from-black/40 to-black/80 p-4">
 					<div>
-						<h1 class="text-3xl font-semibold text-white">{$query.data.name}</h1>
+						<h1 class="text-3xl font-semibold text-white">{$bookContent.name}</h1>
 						<h4 class="text-md mb-4 text-white">
-							Oleh {$query.data.collaboratorsByRole.AUTHOR.map((author) => author.name).join(', ')}, {$query
-								.data.totalPages} halaman
+							Oleh {$bookContent.collaboratorsByRole.AUTHOR.map((author) => author.name).join(
+								', '
+							)}, {$bookContent.totalPages} halaman
 						</h4>
 					</div>
 					<Button variant="outline" size="lg" class="shadow" on:click={() => navigateTo('next')}
@@ -159,11 +171,11 @@
 					</div>
 					<div class="mx-2 grow rounded bg-black bg-opacity-50 text-{fontSize} text-white">
 						{#if caption}
-							{@html $query.data.pages[pageState.current - 1].extractedLongContentValue}
+							{@html $bookContent.pages[pageState.current - 1].extractedLongContentValue}
 						{/if}
 					</div>
 					<div class="flex-none">
-						{#if pageState.current !== $query.data.pages.length - 1}
+						{#if pageState.current !== $bookContent.pages.length - 1}
 							<Button variant="outline" class="shadow" on:click={() => navigateTo('next')}
 								>Hal. {pageState.next}</Button
 							>
