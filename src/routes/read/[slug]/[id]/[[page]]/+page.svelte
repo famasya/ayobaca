@@ -52,12 +52,14 @@
 	$: fontSize = 'lg';
 
 	const swipeHandler = (event: any) => {
-		const direction = event.detail.direction;
-		if (direction === 'left') {
-			navigateTo('next');
-		}
-		if (direction === 'right') {
-			navigateTo('prev');
+		if ($query.data) {
+			const direction = event.detail.direction;
+			if (direction === 'left' && pageState.current !== $query.data.pages.length - 1) {
+				navigateTo('next');
+			}
+			if (direction === 'right' && pageState.current !== 0) {
+				navigateTo('prev');
+			}
 		}
 	};
 </script>
