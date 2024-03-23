@@ -5,10 +5,13 @@ declare global {
 		// interface Error {}
 		// interface Locals {}
 		// interface PageData {}
-		// interface PageState {}
+		interface PageState {
+			search?: string
+		}
 		// interface Platform {}
 	}
 }
 
 /// <reference types="svelte-gestures" />
-export {};
+export { };
+

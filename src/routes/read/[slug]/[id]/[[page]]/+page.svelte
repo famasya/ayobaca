@@ -7,6 +7,7 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { createQuery } from '@tanstack/svelte-query';
 	import { ALargeSmall, ArrowLeft, Book as BookIcon, Captions, Menu } from 'lucide-svelte';
+	import { onMount } from 'svelte';
 	import { swipe } from 'svelte-gestures';
 	import { writable } from 'svelte/store';
 	import type { Book } from '../../../../../types';
@@ -38,6 +39,9 @@
 	$: preloadImageUrls = $query.data?.pages.map((page) => page.imageUrl) ?? [];
 	$: caption = true;
 	$: fontSize = 'md';
+
+	let backPathname = '';
+	onMount(() => (backPathname = document.referrer));
 
 	const navigateTo = (state: 'next' | 'prev') => {
 		const openPage = pageState.current + (state === 'next' ? 1 : -1);
@@ -80,8 +84,6 @@
 				break;
 		}
 	};
-
-	const doubleTapHandler = () => (caption = !caption);
 </script>
 
 <svelte:head>
@@ -100,8 +102,8 @@
 	on:swipe={swipeHandler}
 >
 	<div class="absolute left-2 top-2">
-		<Button variant="outline" href="/" size="sm" class="shadow"
-			><ArrowLeft class="h-4" /> Keluar</Button
+		<Button variant="outline" on:click={() => history.back()} size="sm" class="shadow"
+			><ArrowLeft class="h-4" /> Kembali</Button
 		>
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger>
@@ -186,7 +188,7 @@
 					</div>
 				</div>
 			{:else}
-				<div class="mx-auto flex max-w-lg items-center px-4 py-2">
+				<div class="mx-auto flex max-w-xl items-center px-4 py-2">
 					<div class="mx-2 grow rounded bg-black bg-opacity-50 text-{fontSize} text-white">
 						{#if caption}
 							{@html $bookContent.pages[pageState.current - 1].extractedLongContentValue}

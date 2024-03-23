@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { pushState } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { Badge } from '$lib/components/ui/badge';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Card } from '$lib/components/ui/card';
@@ -10,7 +12,14 @@
 	import { BookA, ExternalLink, Github, Loader } from 'lucide-svelte';
 	import { writable } from 'svelte/store';
 	import type { SearchResult } from '../types';
-	let searchTerm = '';
+
+	let searchTerm = $page.url.searchParams.get('search') ?? '';
+	$: isSearching = false;
+
+	if ($page.state.search) {
+		searchTerm = $page.state.search;
+	}
+
 	let previousSearch: string | null = null;
 	$: cursor = '0';
 	const searchResults = writable<SearchResult['other']>([]);
@@ -20,6 +29,9 @@
 		clearTimeout(timer);
 		timer = setTimeout(async () => {
 			searchResults.set([]);
+			pushState(`/?search=${term}`, {
+				search: term
+			});
 			searchTerm = term;
 			cursor = '0';
 		}, 500);
@@ -28,11 +40,16 @@
 	$: search = createQuery<SearchResult>({
 		queryKey: ['search', searchTerm, cursor],
 		queryFn: async () => {
+			isSearching = true;
 			const results = (await (
 				await fetch(
 					`https://letsreadasia.org/api/book/elastic/search/?searchText=${searchTerm}&lId=6260074016145408&limit=24&cursor=${cursor}`
 				)
 			).json()) as SearchResult;
+
+			pushState(`/?search=${searchTerm}`, {
+				search: searchTerm
+			});
 
 			if (previousSearch !== searchTerm) {
 				searchResults.set([...results.other]);
@@ -42,12 +59,14 @@
 
 			previousSearch = searchTerm;
 
+			isSearching = false;
+
 			return results;
 		},
 		enabled: browser
 	});
 
-	$: selectedLang = {
+	let selectedLang = {
 		label: 'Bahasa Indonesia',
 		value: 6260074016145408
 	};
@@ -58,18 +77,21 @@
 </svelte:head>
 
 <div class="mx-auto mb-8 flex max-w-2xl flex-col px-2 py-4">
-	<div class="mb-4 flex flex-col items-center justify-center">
-		<span class="flex flex-row">
-			<BookA class="h-8" />
-			<h1 class="mx-2 inline text-2xl">Ayo Baca</h1>
-		</span>
-		<span
-			class="max-w-1/3 border-1 mt-1 rounded border border-green-600 bg-green-50 px-4 text-green-800"
-			>Baca cerita dari LetsReadAsia</span
-		>
+	<div class="mb-4 flex flex-row items-center justify-end">
+		<div class="w-4/6">
+			<span class="flex flex-row">
+				<BookA class="h-8" />
+				<h1 class="mx-2 inline text-2xl">Ayo Baca</h1>
+			</span>
+			<span class="mt-1 text-sm">Baca cerita dari LetsReadAsia</span>
+		</div>
+		<div class="w-2/6">
+			<!-- favorit button later-->
+		</div>
 	</div>
 	<Input
 		placeholder="Ketikkan sesuatu..."
+		value={searchTerm}
 		on:keyup={(e) => {
 			setSearchKeyword(e.currentTarget.value);
 		}}
@@ -77,10 +99,14 @@
 	/>
 
 	{#if searchTerm.length > 0}
-		<h4 class="mt-4 font-semibold">Hasil pencarian <Badge>{searchTerm}</Badge></h4>
+		<h4 class="mt-4 font-semibold">
+			Hasil pencarian <Badge>
+				{searchTerm}
+			</Badge>
+		</h4>
 	{/if}
 
-	{#if $search.isLoading || $searchResults.length === 0}
+	{#if $search.isLoading || isSearching}
 		<div class="mt-4 flex flex-row items-center justify-center gap-2 p-4">
 			<Loader />
 			<span> Memuat </span>
@@ -171,10 +197,12 @@
 										</Select.Root>
 									</div>
 									<div class="w-2/3">
-										<Button
-											href="/read/{slug}/{result.masterBookId}?lang={selectedLang.value}"
-											class="w-full bg-green-700">Buka Buku</Button
-										>
+										<div class="flex flex-row gap-2">
+											<Button
+												href="/read/{slug}/{result.masterBookId}?lang={selectedLang.value}"
+												class="w-full bg-green-700">Buka Buku</Button
+											>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -183,12 +211,19 @@
 				</Drawer.Root>
 			{/each}
 		</div>
+
 		<Button
 			class="bg-green-700 shadow hover:bg-green-800"
-			on:click={() => (cursor = $search.data?.cursorWebSafeString ?? '0')}
-			disabled={$search.isLoading}>{$search.isLoading ? 'Memuat...' : 'Selanjutnya'}</Button
+			on:click={() => (cursor = $search.data?.cursorWebSafeString ?? '')}
+			disabled={$search.isLoading || $search.data?.cursorWebSafeString === null}
+			>{$search.isLoading ? 'Memuat...' : 'Selanjutnya'}</Button
 		>
 	{/if}
+
+	{#if !isSearching && $searchResults.length === 0}
+		<p class="my-8 rounded bg-gray-100 p-12 text-center">Tidak ada hasil</p>
+	{/if}
+
 	<div class="mt-2 flex flex-row items-center justify-center text-xs">
 		<Button
 			variant="outline"
