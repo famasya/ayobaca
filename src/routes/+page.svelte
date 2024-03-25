@@ -9,9 +9,10 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
 	import { createQuery } from '@tanstack/svelte-query';
-	import { BookA, ExternalLink, Github, Loader } from 'lucide-svelte';
+	import { ExternalLink, Github, Loader } from 'lucide-svelte';
 	import { writable } from 'svelte/store';
 	import type { SearchResult } from '../types';
+	import Header from './header.svelte';
 
 	let searchTerm = $page.url.searchParams.get('search') ?? '';
 	$: isSearching = false;
@@ -26,9 +27,9 @@
 
 	let timer: ReturnType<typeof setTimeout>;
 	const setSearchKeyword = (term: string) => {
+		searchResults.set([]);
 		clearTimeout(timer);
 		timer = setTimeout(async () => {
-			searchResults.set([]);
 			pushState(`/?search=${term}`, {
 				search: term
 			});
@@ -47,9 +48,11 @@
 				)
 			).json()) as SearchResult;
 
-			pushState(`/?search=${searchTerm}`, {
-				search: searchTerm
-			});
+			if (searchTerm.length > 0) {
+				pushState(`/?search=${searchTerm}`, {
+					search: searchTerm
+				});
+			}
 
 			if (previousSearch !== searchTerm) {
 				searchResults.set([...results.other]);
@@ -58,11 +61,11 @@
 			}
 
 			previousSearch = searchTerm;
-
 			isSearching = false;
 
 			return results;
 		},
+		refetchOnWindowFocus: false,
 		enabled: browser
 	});
 
@@ -77,18 +80,7 @@
 </svelte:head>
 
 <div class="mx-auto mb-8 flex max-w-2xl flex-col px-2 py-4">
-	<div class="mb-4 flex flex-row items-center justify-end">
-		<div class="w-4/6">
-			<span class="flex flex-row">
-				<BookA class="h-8" />
-				<h1 class="mx-2 inline text-2xl">Ayo Baca</h1>
-			</span>
-			<span class="mt-1 text-sm">Baca cerita dari LetsReadAsia</span>
-		</div>
-		<div class="w-2/6">
-			<!-- favorit button later-->
-		</div>
-	</div>
+	<Header />
 	<Input
 		placeholder="Ketikkan sesuatu..."
 		value={searchTerm}
@@ -106,7 +98,7 @@
 		</h4>
 	{/if}
 
-	{#if $search.isLoading || isSearching}
+	{#if $search.isLoading || isSearching || $search.status === 'pending'}
 		<div class="mt-4 flex flex-row items-center justify-center gap-2 p-4">
 			<Loader />
 			<span> Memuat </span>
@@ -220,7 +212,7 @@
 		>
 	{/if}
 
-	{#if !isSearching && $searchResults.length === 0}
+	{#if !isSearching && $searchResults.length === 0 && $search.status !== 'pending'}
 		<p class="my-8 rounded bg-gray-100 p-12 text-center">Tidak ada hasil</p>
 	{/if}
 

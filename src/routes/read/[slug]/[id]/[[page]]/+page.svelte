@@ -2,11 +2,12 @@
 	import { browser } from '$app/environment';
 	import { pushState } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { userPrefs } from '$lib/common';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { createQuery } from '@tanstack/svelte-query';
-	import { ALargeSmall, ArrowLeft, Book as BookIcon, Captions, Menu } from 'lucide-svelte';
+	import { ALargeSmall, ArrowLeft, Book as BookIcon, Captions, Heart, Menu } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import { swipe } from 'svelte-gestures';
 	import { writable } from 'svelte/store';
@@ -84,6 +85,27 @@
 				break;
 		}
 	};
+
+	const addToFavorite = (bookId: string) => {
+		if ($query.data !== undefined) {
+			const { name, authors, thumborCoverImageUrl } = $query.data;
+			userPrefs.update((prefs) => {
+				return {
+					favoriteBooks: [
+						...prefs.favoriteBooks,
+						{
+							id: id,
+							slug: slug,
+							title: name,
+							cover: thumborCoverImageUrl,
+							language: lang
+						}
+					]
+				};
+			});
+		}
+	};
+	$: isInFavoriteBooks = $userPrefs.favoriteBooks.some((book) => book.id === id);
 </script>
 
 <svelte:head>
@@ -94,7 +116,7 @@
 	{/each}
 </svelte:head>
 
-<svelte:window on:keydown|preventDefault={navigationHandler} />
+<svelte:window on:keydown={navigationHandler} />
 
 <div
 	class="relative flex h-dvh items-center justify-center"
@@ -144,9 +166,23 @@
 	</div>
 
 	<div class="absolute right-2 top-2">
-		<Badge class="bg-green-700">
-			Hal. {pageState.current} dari {$query.data?.pages.length}
-		</Badge>
+		<div class="flex flex-row items-center justify-center gap-2">
+			<Badge class="bg-green-700">
+				Hal. {pageState.current} dari {$query.data?.pages.length ?? '-'}
+			</Badge>
+			<Button
+				size="icon"
+				variant="outline"
+				on:click={() => $query.data && addToFavorite($query.data.masterBookId)}
+				class="bg-rose-600 shadow hover:bg-rose-700"
+			>
+				{#if isInFavoriteBooks}
+					<Heart color="#ffffff" fill="#ffffff" class="h-5" />
+				{:else}
+					<Heart color="#ffffff" class="h-5" />
+				{/if}
+			</Button>
+		</div>
 	</div>
 
 	{#if $query.isError}
