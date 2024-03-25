@@ -28,9 +28,9 @@
 
 	let timer: ReturnType<typeof setTimeout>;
 	const setSearchKeyword = (term: string) => {
-		searchResults.set([]);
 		clearTimeout(timer);
 		timer = setTimeout(async () => {
+			searchResults.set([]);
 			pushState(`/?search=${term}`, {
 				search: term
 			});
@@ -64,6 +64,7 @@
 			if (previousSearch !== searchTerm) {
 				searchResults.set([...results.other]);
 			} else {
+				// load more page
 				searchResults.update((current) => [...current, ...results.other]);
 			}
 
@@ -105,7 +106,7 @@
 		</h4>
 	{/if}
 	<div class="mb-4 mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4">
-		{#if $search.isLoading || isSearching || $search.status === 'pending'}
+		{#if ($search.isLoading || isSearching || $search.status === 'pending') && previousSearch !== searchTerm}
 			{#each Array(24) as _, index (index)}
 				<Skeleton class="h-48 rounded" />
 			{/each}
@@ -210,11 +211,10 @@
 				</Drawer.Root>
 			{/each}
 		{/if}
-
-		{#if !isSearching && $searchResults.length === 0 && $search.status !== 'pending'}
-			<p class="my-8 rounded bg-gray-100 p-12 text-center">Tidak ada hasil</p>
-		{/if}
 	</div>
+	{#if !isSearching && $searchResults.length === 0 && $search.status !== 'pending'}
+		<p class="rounded bg-gray-100 p-12 text-center">Tidak ada hasil</p>
+	{/if}
 	{#if $search.data?.cursorWebSafeString}
 		<Button
 			class="bg-green-700 shadow hover:bg-green-800"
