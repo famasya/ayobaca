@@ -1,7 +1,8 @@
 <script lang="ts">
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Heart, Home, Menu, MessageCircleHeart, Notebook } from 'lucide-svelte';
+	import { Github, Heart, Home, Menu, MessageCircleHeart, Notebook } from 'lucide-svelte';
 	let openChangelog = false;
 
 	const releaseNotes = [
@@ -15,7 +16,11 @@
 </script>
 
 <DropdownMenu.Root>
-	<DropdownMenu.Trigger class="border-1 rounded border p-2 shadow"><Menu /></DropdownMenu.Trigger>
+	<DropdownMenu.Trigger>
+		<Button variant="outline" size="icon" class="border-1 rounded border p-2 shadow">
+			<Menu />
+		</Button>
+	</DropdownMenu.Trigger>
 	<DropdownMenu.Content>
 		<DropdownMenu.Item href="/">
 			<Home class="mr-2 h-4 w-4" />
@@ -33,6 +38,10 @@
 		<DropdownMenu.Item href="https://tally.so/r/3ly0NW" target="_blank">
 			<MessageCircleHeart class="mr-2 h-4 w-4" />
 			<span>Beri saran</span>
+		</DropdownMenu.Item>
+		<DropdownMenu.Item href="https://github.com/famasya/ayobaca" target="_blank">
+			<Github class="mr-2 h-4 w-4" />
+			<span>Kode sumber</span>
 		</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>

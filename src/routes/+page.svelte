@@ -8,8 +8,9 @@
 	import * as Drawer from '$lib/components/ui/drawer';
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
+	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { createQuery } from '@tanstack/svelte-query';
-	import { ExternalLink, Github, Loader } from 'lucide-svelte';
+	import { ExternalLink } from 'lucide-svelte';
 	import { writable } from 'svelte/store';
 	import type { SearchResult } from '../types';
 	import Header from './header.svelte';
@@ -97,17 +98,15 @@
 			</Badge>
 		</h4>
 	{/if}
-
-	{#if $search.isLoading || isSearching || $search.status === 'pending'}
-		<div class="mt-4 flex flex-row items-center justify-center gap-2 p-4">
-			<Loader />
-			<span> Memuat </span>
-		</div>
-	{:else if $search.isError}
-		<p>Error: {$search.error.message}</p>
-	{/if}
-	{#if $searchResults.length > 0}
-		<div class="mb-4 mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4">
+	<div class="mb-4 mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-4">
+		{#if $search.isLoading || isSearching || $search.status === 'pending'}
+			{#each Array(24) as _, index (index)}
+				<Skeleton class="h-48 rounded" />
+			{/each}
+		{:else if $search.isError}
+			<p>Error: {$search.error.message}</p>
+		{/if}
+		{#if $searchResults.length > 0}
 			{#each $searchResults as result}
 				{@const slug = result.name.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}
 				<Drawer.Root>
@@ -120,6 +119,8 @@
 								id={`${slug}-cover`}
 								src={result.thumborCoverImageUrl}
 								alt={result.name}
+								height="400"
+								width="300"
 								class="h-48 object-cover"
 							/>
 							<div
@@ -202,8 +203,13 @@
 					</Drawer.Content>
 				</Drawer.Root>
 			{/each}
-		</div>
+		{/if}
 
+		{#if !isSearching && $searchResults.length === 0 && $search.status !== 'pending'}
+			<p class="my-8 rounded bg-gray-100 p-12 text-center">Tidak ada hasil</p>
+		{/if}
+	</div>
+	{#if $search.data?.cursorWebSafeString}
 		<Button
 			class="bg-green-700 shadow hover:bg-green-800"
 			on:click={() => (cursor = $search.data?.cursorWebSafeString ?? '')}
@@ -211,20 +217,4 @@
 			>{$search.isLoading ? 'Memuat...' : 'Selanjutnya'}</Button
 		>
 	{/if}
-
-	{#if !isSearching && $searchResults.length === 0 && $search.status !== 'pending'}
-		<p class="my-8 rounded bg-gray-100 p-12 text-center">Tidak ada hasil</p>
-	{/if}
-
-	<div class="mt-2 flex flex-row items-center justify-center text-xs">
-		<Button
-			variant="outline"
-			class="shadow"
-			size="sm"
-			href="https://github.com/famasya/ayobaca"
-			target="_blank"
-		>
-			<Github class="h-4" /> <span>Kode Sumber</span>
-		</Button>
-	</div>
 </div>
