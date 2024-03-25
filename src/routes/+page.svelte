@@ -215,12 +215,10 @@
 	{#if !isSearching && $searchResults.length === 0 && $search.status !== 'pending'}
 		<p class="rounded bg-gray-100 p-12 text-center">Tidak ada hasil</p>
 	{/if}
-	{#if $search.data?.cursorWebSafeString}
-		<Button
-			class="bg-green-700 shadow hover:bg-green-800"
-			on:click={() => (cursor = $search.data?.cursorWebSafeString ?? '')}
-			disabled={$search.isLoading || $search.data?.cursorWebSafeString === null}
-			>{$search.isLoading ? 'Memuat...' : 'Selanjutnya'}</Button
-		>
-	{/if}
+	<Button
+		class="bg-green-700 shadow hover:bg-green-800"
+		on:click={() => (cursor = $search.data?.cursorWebSafeString ?? '')}
+		disabled={$search.isLoading || $search.data?.cursorWebSafeString === null}
+		>{$search.isLoading ? 'Memuat...' : 'Selanjutnya'}</Button
+	>
 </div>
