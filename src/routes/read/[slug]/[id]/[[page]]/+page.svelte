@@ -27,7 +27,12 @@
 		queryKey: ['book-content'],
 		queryFn: async () => {
 			const content = (await (
-				await fetch(`https://letsreadasia.org/api/v5/book/preview/language/${lang}/book/${id}`)
+				await fetch(`https://letsreadasia.org/api/v5/book/preview/language/${lang}/book/${id}`, {
+					cache: 'force-cache',
+					headers: {
+						'Cache-Control': 'max-age=29030400'
+					}
+				})
 			).json()) as Book;
 
 			bookContent.set(content);

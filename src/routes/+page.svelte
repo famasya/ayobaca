@@ -45,7 +45,13 @@
 			isSearching = true;
 			const results = (await (
 				await fetch(
-					`https://letsreadasia.org/api/book/elastic/search/?searchText=${searchTerm}&lId=6260074016145408&limit=24&cursor=${cursor}`
+					`https://letsreadasia.org/api/book/elastic/search/?searchText=${searchTerm}&lId=6260074016145408&limit=24&cursor=${cursor}`,
+					{
+						cache: 'force-cache',
+						headers: {
+							'Cache-Control': 'max-age=29030400'
+						}
+					}
 				)
 			).json()) as SearchResult;
 
