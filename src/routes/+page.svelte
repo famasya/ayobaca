@@ -185,7 +185,7 @@
 													value: e.value ?? 6260074016145408
 												})}
 										>
-											<Select.Trigger class="w-full">
+											<Select.Trigger class="w-full shadow">
 												<Select.Value placeholder="Pilih bahasa" />
 											</Select.Trigger>
 											<Select.Content>
@@ -200,7 +200,8 @@
 										<div class="flex flex-row gap-2">
 											<Button
 												href="/read/{slug}/{result.masterBookId}?lang={selectedLang.value}"
-												class="w-full bg-green-700">Buka Buku</Button
+												target="_blank"
+												class="w-full bg-green-700 shadow">Buka Buku</Button
 											>
 										</div>
 									</div>

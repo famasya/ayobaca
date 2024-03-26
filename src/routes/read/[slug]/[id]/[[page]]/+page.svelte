@@ -8,7 +8,6 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { createQuery } from '@tanstack/svelte-query';
 	import { ALargeSmall, ArrowLeft, Book as BookIcon, Captions, Heart, Menu } from 'lucide-svelte';
-	import { onMount } from 'svelte';
 	import { swipe } from 'svelte-gestures';
 	import { writable } from 'svelte/store';
 	import type { Book } from '../../../../../types';
@@ -45,9 +44,6 @@
 	$: preloadImageUrls = $query.data?.pages.map((page) => page.imageUrl) ?? [];
 	$: caption = true;
 	$: fontSize = 'md';
-
-	let backPathname = '';
-	onMount(() => (backPathname = document.referrer));
 
 	const navigateTo = (state: 'next' | 'prev') => {
 		const openPage = pageState.current + (state === 'next' ? 1 : -1);
@@ -129,7 +125,7 @@
 	on:swipe={swipeHandler}
 >
 	<div class="absolute left-2 top-2">
-		<Button variant="outline" on:click={() => history.back()} size="sm" class="shadow"
+		<Button variant="outline" on:click={() => window.close()} size="sm" class="shadow"
 			><ArrowLeft class="h-4" /> Kembali</Button
 		>
 		<DropdownMenu.Root>
