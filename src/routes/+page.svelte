@@ -28,6 +28,10 @@
 
 	let timer: ReturnType<typeof setTimeout>;
 	const setSearchKeyword = (term: string) => {
+		if (previousSearch === term) {
+			return;
+		}
+
 		clearTimeout(timer);
 		timer = setTimeout(async () => {
 			searchResults.set([]);
@@ -214,7 +218,7 @@
 		{/if}
 	</div>
 	{#if !isSearching && $searchResults.length === 0 && $search.status !== 'pending'}
-		<p class="rounded bg-gray-100 p-12 text-center">Tidak ada hasil</p>
+		<p class="mb-4 rounded bg-gray-100 p-12 text-center">Tidak ada hasil</p>
 	{/if}
 	<Button
 		class="bg-green-700 shadow hover:bg-green-800"
