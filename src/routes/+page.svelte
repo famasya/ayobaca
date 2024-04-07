@@ -10,13 +10,52 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
 	import { Skeleton } from '$lib/components/ui/skeleton';
+	import { createClient } from '@supabase/supabase-js';
 	import { createQuery } from '@tanstack/svelte-query';
 	import { ExternalLink, ShieldX } from 'lucide-svelte';
 	import { writable } from 'svelte/store';
-	import type { SearchResult } from '../types';
+	import type { BookSearchResult } from '../types';
 	import Header from './header.svelte';
 
-	let searchTerm = $page.url.searchParams.get('search') ?? '';
+	const supabase = createClient(
+		'https://galfdawphfkpamsqclpi.supabase.co',
+		'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdhbGZkYXdwaGZrcGFtc3FjbHBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTIxMjY1ODksImV4cCI6MjAyNzcwMjU4OX0.6WqeSP4v8AkD_ulk1SQep1Y8w4bYURS7ATPo_oSbDCA'
+	);
+
+	$: search = createQuery<BookSearchResult[]>({
+		queryKey: ['search', searchTerm, cursor],
+		queryFn: async () => {
+			const { data, error } = await supabase.rpc('get_books', {
+				_limit: 24,
+				_randomize: searchTerm === '',
+				_search: searchTerm,
+				_offset: cursor * 24
+			});
+			if (error) throw error;
+
+			if (searchTerm.length > 0) {
+				pushState(`/?search=${searchTerm}`, {
+					search: searchTerm
+				});
+			}
+
+			if (previousSearch !== searchTerm) {
+				searchResults.set([...data]);
+			} else {
+				// load more page
+				searchResults.update((current) => [...current, ...data]);
+			}
+
+			previousSearch = searchTerm;
+			isSearching = false;
+
+			return data;
+		},
+		refetchOnWindowFocus: false,
+		enabled: browser
+	});
+
+	let searchTerm = '';
 	$: isSearching = false;
 
 	if ($page.state.search) {
@@ -24,8 +63,8 @@
 	}
 
 	let previousSearch: string | null = null;
-	$: cursor = '0';
-	const searchResults = writable<SearchResult['other']>([]);
+	$: cursor = 0;
+	const searchResults = writable<BookSearchResult[]>([]);
 
 	let timer: ReturnType<typeof setTimeout>;
 	const setSearchKeyword = (term: string) => {
@@ -40,47 +79,9 @@
 				search: term
 			});
 			searchTerm = term;
-			cursor = '0';
+			cursor = 0;
 		}, 500);
 	};
-
-	$: search = createQuery<SearchResult>({
-		queryKey: ['search', searchTerm, cursor],
-		queryFn: async () => {
-			isSearching = true;
-			const results = (await (
-				await fetch(
-					`https://letsreadasia.org/api/book/elastic/search/?searchText=${searchTerm}&lId=6260074016145408&limit=24&cursor=${cursor}`,
-					{
-						cache: 'force-cache',
-						headers: {
-							'Cache-Control': 'max-age=29030400'
-						}
-					}
-				)
-			).json()) as SearchResult;
-
-			if (searchTerm.length > 0) {
-				pushState(`/?search=${searchTerm}`, {
-					search: searchTerm
-				});
-			}
-
-			if (previousSearch !== searchTerm) {
-				searchResults.set([...results.other]);
-			} else {
-				// load more page
-				searchResults.update((current) => [...current, ...results.other]);
-			}
-
-			previousSearch = searchTerm;
-			isSearching = false;
-
-			return results;
-		},
-		refetchOnWindowFocus: false,
-		enabled: browser
-	});
 
 	let selectedLang = {
 		label: 'Bahasa Indonesia',
@@ -125,7 +126,7 @@
 			{/if}
 			{#if $searchResults.length > 0}
 				{#each $searchResults as result}
-					{@const slug = result.name.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}
+					{@const slug = result._name.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}
 					<Drawer.Root>
 						<Drawer.Trigger>
 							<Card
@@ -134,8 +135,8 @@
 							>
 								<img
 									id={`${slug}-cover`}
-									src={result.thumborCoverImageUrl}
-									alt={result.name}
+									src={result._coverimage}
+									alt={result._name}
 									height="400"
 									width="300"
 									class="h-48 object-cover"
@@ -143,33 +144,26 @@
 								<div
 									class="absolute bottom-0 left-0 right-0 rounded-b bg-gradient-to-b from-transparent to-black/70 p-2 pt-10 font-semibold text-white"
 								>
-									<p>{result.name}</p>
+									<p>{result._name}</p>
 								</div>
 							</Card>
 						</Drawer.Trigger>
 						<Drawer.Content>
 							<div class="mx-auto w-full max-w-xl">
 								<Drawer.Header>
-									<Drawer.Title>{result.name}</Drawer.Title>
+									<Drawer.Title>{result._name}</Drawer.Title>
 									<Drawer.Description class="mt-2 flex flex-col gap-2">
-										<p>Jumlah halaman : {result.totalPages} halaman</p>
-										<p>Tingkat kesulitan : {result.readingLevel}</p>
+										<p>Jumlah halaman : {result._totalpages} halaman</p>
+										<p>Tingkat kesulitan : {result._readinglevel}</p>
 										<p>
-											Kontributor :
-											{#if result.contributingUsers.length === 0}
-												Tidak tersedia
-											{:else}
-												{result.contributingUsers.join(', ')}
-											{/if}
+											Pengarang : {result._authors}
 										</p>
 										<p>
-											Kategori : {result.tags
-												.map((t) => t.localizations[6260074016145408])
-												.join(', ')}
+											Kategori : {result._tags.map((tag) => tag.name).join(', ')}
 										</p>
 										<p>
 											Origin URL : <a
-												href={`https://www.letsreadasia.org/book/${result.masterBookId}?bookLang=6260074016145408`}
+												href={`https://www.letsreadasia.org/book/${result._masterbookid}?bookLang=6260074016145408`}
 												target="_blank"
 												rel="noreferrer"
 												><Badge class="bg-green-700"
@@ -182,7 +176,7 @@
 								<div class="mx-4 mb-8 mt-4">
 									<div class="mb-8">
 										<h4 class="mb-1 font-semibold">Ringkasan</h4>
-										<p>{result.description ?? 'Tidak tersedia'}</p>
+										<p>{result._description ?? 'Tidak tersedia'}</p>
 									</div>
 									<div class="flex flex-row gap-2">
 										<div class="w-1/3">
@@ -199,7 +193,7 @@
 													<Select.Value placeholder="Pilih bahasa" />
 												</Select.Trigger>
 												<Select.Content>
-													{#each result.availableLanguages as lang}
+													{#each result._availablelanguages as lang}
 														<Select.Item value={lang.id} label={lang.name}>{lang.name}</Select.Item>
 													{/each}
 												</Select.Content>
@@ -209,7 +203,7 @@
 										<div class="w-2/3">
 											<div class="flex flex-row gap-2">
 												<Button
-													href="/read/{slug}/{result.masterBookId}?lang={selectedLang.value}"
+													href="/read/{slug}/{result._masterbookid}?lang={selectedLang.value}"
 													target="_blank"
 													class="w-full bg-green-700 shadow">Buka Buku</Button
 												>
@@ -228,8 +222,8 @@
 		{/if}
 		<Button
 			class="bg-green-700 shadow hover:bg-green-800"
-			on:click={() => (cursor = $search.data?.cursorWebSafeString ?? '')}
-			disabled={$search.isLoading || $search.data?.cursorWebSafeString === null}
+			on:click={() => (cursor = cursor + 1)}
+			disabled={$search.isLoading || $search.data?.length === 0}
 			>{$search.isLoading ? 'Memuat...' : 'Selanjutnya'}</Button
 		>
 	{/if}

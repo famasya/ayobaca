@@ -11,6 +11,13 @@
 			notes: [
 				'Ditambahkan fitur "favorit" untuk menandai buku favoritmu. Klik tombol hati di sebelah kanan atas ketika membaca buku.'
 			]
+		},
+		{
+			date: '2024-04-07',
+			notes: [
+				'Mempercepat proses pencarian',
+				'Buku di halaman awal sekarang ditampilkan secara acak'
+			]
 		}
 	];
 </script>
@@ -56,7 +63,7 @@
 			<AlertDialog.Title class="mb-2">Catatan Rilis</AlertDialog.Title>
 			<AlertDialog.Description>
 				{#each releaseNotes as note}
-					<div class="border-l-4 border-green-500 pl-4">
+					<div class="mt-2 border-l-4 border-green-500 pl-4">
 						<p class="text-black">{note.date}</p>
 						<ul class="list-decimal pl-4">
 							{#each note.notes as noteText}

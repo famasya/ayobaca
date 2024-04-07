@@ -252,138 +252,24 @@ export type Book = {
   featured: boolean
 }
 
-export type SearchResult = {
-  featured: any
-  other: Array<{
-    id: string
+export type BookSearchResult = {
+  _name: string
+  _authors: string
+  _coverimage: string
+  _language: string
+  _languageid: string
+  _masterbookid: string
+  _readinglevel: number
+  _totalpages: number
+  _tags: Array<{
+    id: number
     name: string
-    description?: string
-    thumborCoverImageUrl: string
-    coverImageUrl: string
-    coverImageServingUrl: string
-    languageId: string
-    language: {
-      createdDate: number
-      lastUpdated: number
-      id: number
-      name: string
-      country: string
-      languageISOCode?: string
-      direction: string
-      uiLanguage: boolean
-      signLanguage: boolean
-      deleted: boolean
-    }
-    signLanguageId: any
-    signLanguage: any
-    masterBookId: string
-    nonMasterMetaDatas: Array<any>
-    masterBookMetaData: any
-    illustrator: string
-    createdDate: number
-    featuredTimeStamp: number
-    status: string
-    availableLanguages: Array<{
-      createdDate: number
-      lastUpdated: number
-      id: number
-      name: string
-      country: string
-      languageISOCode?: string
-      direction: string
-      uiLanguage: boolean
-      signLanguage: boolean
-      deleted: boolean
-    }>
-    availableAudioLanguages: Array<{
-      createdDate: number
-      lastUpdated: number
-      id: number
-      name: string
-      country: string
-      languageISOCode: string
-      direction: string
-      uiLanguage: boolean
-      signLanguage: boolean
-      deleted: boolean
-    }>
-    availableVideoLanguages: Array<{
-      createdDate: number
-      lastUpdated: number
-      id: number
-      name: string
-      country: string
-      languageISOCode: string
-      direction: string
-      uiLanguage: boolean
-      signLanguage: boolean
-      deleted: boolean
-    }>
-    featuredLanguages: Array<{
-      createdDate: number
-      lastUpdated: number
-      id: number
-      name: string
-      country: string
-      languageISOCode: string
-      direction: string
-      uiLanguage: boolean
-      signLanguage: boolean
-      deleted: boolean
-    }>
-    authors: Array<any>
-    contributingUsers: Array<string>
-    collaboratorsByRole: {
-      AUTHOR: Array<any>
-      ILLUSTRATOR: Array<any>
-      EDITOR: Array<any>
-      DESIGNER: Array<any>
-      PUBLISHER: Array<any>
-      AMBASSADOR: Array<any>
-      CONTRIBUTOR: Array<any>
-      SIGNER: Array<any>
-      NARRATOR: Array<any>
-      ORGANIZATION: Array<any>
-    }
-    readingLevel: string
-    totalPages: number
-    license: string
-    publisher: any
-    notes?: string
-    progress: number
-    currentPage: number
-    slug?: string
-    activity: any
-    hasActivity: boolean
-    hasAudio: boolean
-    hasVideo: boolean
-    epubUrl: string
-    pdfUrl?: {
-      bookId: string
-      bookletUrl: string
-      landscapeUrl: string
-      potraitUrl: string
-    }
-    pages: any
-    originalUrl: any
-    tags: Array<{
-      createdDate: number
-      lastUpdated: number
-      id: number
-      name: string
-      url: string
-      localizations: Record<string, string>
-      idClone: string
-      deleted: boolean
-    }>
-    translationAvailable: boolean
-    translationStatus: any
-    countryOfOrigin: string
-    favorite: boolean
-    featured: boolean
   }>
-  cursorWebSafeString: string
-  searchResultsMessage: string
-  totalBooks: number
+  _availablelanguages: Array<{
+    id: number
+    name: string
+  }>
+  _seqid: number
+  _description: string
+  _randomfactor: number
 }
-
