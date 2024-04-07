@@ -17,6 +17,11 @@
 	import type { BookSearchResult } from '../types';
 	import Header from './header.svelte';
 
+	// redirect to new site
+	if (browser && $page.url.href.includes('pages.dev')) {
+		window.location.href = 'https://ayobaca.cc';
+	}
+
 	const supabase = createClient(
 		'https://galfdawphfkpamsqclpi.supabase.co',
 		'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdhbGZkYXdwaGZrcGFtc3FjbHBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTIxMjY1ODksImV4cCI6MjAyNzcwMjU4OX0.6WqeSP4v8AkD_ulk1SQep1Y8w4bYURS7ATPo_oSbDCA'
@@ -108,7 +113,9 @@
 		<Alert.Root variant="destructive" class="my-4">
 			<ShieldX class="h-5 w-5" />
 			<Alert.Title>Terjadi kesalahan :(</Alert.Title>
-			<Alert.Description>Sepertinya terjadi kesalahan di server LetsReadAsia</Alert.Description>
+			<Alert.Description
+				>Sepertinya terjadi kesalahan di server. Harap laporkan ke kami.</Alert.Description
+			>
 		</Alert.Root>
 	{:else}
 		{#if searchTerm.length > 0}
