@@ -18,9 +18,9 @@
 	import Header from './header.svelte';
 
 	// redirect to new site
-	if (browser && $page.url.href.includes('pages.dev')) {
-		window.location.href = 'https://ayobaca.cc';
-	}
+	// if (browser && $page.url.href.includes('pages.dev')) {
+	// 	window.location.href = 'https://ayobaca.cc';
+	// }
 
 	const supabase = createClient(
 		'https://galfdawphfkpamsqclpi.supabase.co',
