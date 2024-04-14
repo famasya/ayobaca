@@ -273,3 +273,16 @@ export type BookSearchResult = {
   _description: string
   _randomfactor: number
 }
+
+export type BookContent = {
+  masterBookId: string
+  name: string
+  authors: string
+  coverImage: string
+  book_details: {
+    pageNum: number
+    bookId: string
+    content: string
+    contentRaw: string
+  }[]
+}
