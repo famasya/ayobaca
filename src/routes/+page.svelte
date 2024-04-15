@@ -2,6 +2,7 @@
 	import { browser } from '$app/environment';
 	import { pushState } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { supabase } from '$lib/common';
 	import * as Alert from '$lib/components/ui/alert';
 	import { Badge } from '$lib/components/ui/badge';
 	import Button from '$lib/components/ui/button/button.svelte';
@@ -10,22 +11,11 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
 	import { Skeleton } from '$lib/components/ui/skeleton';
-	import { createClient } from '@supabase/supabase-js';
 	import { createQuery } from '@tanstack/svelte-query';
 	import { ExternalLink, ShieldX } from 'lucide-svelte';
 	import { writable } from 'svelte/store';
 	import type { BookSearchResult } from '../types';
 	import Header from './header.svelte';
-
-	// redirect to new site
-	if (browser && $page.url.href.includes('pages.dev')) {
-		window.location.href = 'https://ayobaca.cc';
-	}
-
-	const supabase = createClient(
-		'https://galfdawphfkpamsqclpi.supabase.co',
-		'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdhbGZkYXdwaGZrcGFtc3FjbHBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTIxMjY1ODksImV4cCI6MjAyNzcwMjU4OX0.6WqeSP4v8AkD_ulk1SQep1Y8w4bYURS7ATPo_oSbDCA'
-	);
 
 	$: search = createQuery<BookSearchResult[]>({
 		queryKey: ['search', searchTerm, cursor],
@@ -98,6 +88,11 @@
 	<title>Ayo Baca</title>
 </svelte:head>
 
+<div class="bg-green-800 py-2 text-center text-white">
+	Ayobaca kini dapat diakses di <a href="https://ayobaca.cc" class="rounded bg-green-700 px-2 py-1"
+		>ayobaca.cc</a
+	>
+</div>
 <div class="mx-auto mb-8 flex max-w-2xl flex-col px-2 py-4">
 	<Header />
 	<Input
@@ -142,7 +137,7 @@
 							>
 								<img
 									id={`${slug}-cover`}
-									src={result._coverimage}
+									src={`https://storage.ayobaca.cc/${result._masterbookid}/0.webp`}
 									alt={result._name}
 									height="400"
 									width="300"
@@ -160,7 +155,7 @@
 								<Drawer.Header>
 									<Drawer.Title>{result._name}</Drawer.Title>
 									<Drawer.Description class="mt-2 flex flex-col gap-2">
-										<p>Jumlah halaman : {result._totalpages} halaman</p>
+										<p>Jumlah halaman : {result._totalpages - 1} halaman</p>
 										<p>Tingkat kesulitan : {result._readinglevel}</p>
 										<p>
 											Pengarang : {result._authors}

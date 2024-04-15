@@ -2,7 +2,7 @@
 	import { browser } from '$app/environment';
 	import { pushState } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { userPrefs } from '$lib/common';
+	import { supabase, userPrefs } from '$lib/common';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
@@ -10,11 +10,14 @@
 	import { ALargeSmall, ArrowLeft, Book as BookIcon, Captions, Heart, Menu } from 'lucide-svelte';
 	import { swipe } from 'svelte-gestures';
 	import { writable } from 'svelte/store';
-	import type { Book } from '../../../../../types';
+	import type { BookContent } from '../../../../../types';
 
 	const { slug, id, page: openPage } = $page.params;
 	const lang = $page.url.searchParams.get('lang') ?? '6260074016145408';
-	const bookContent = writable<Book>();
+	const bookContent = writable<BookContent['book_details']>();
+	const resolveImageUrl = (bookId: string, page: number) => {
+		return `https://storage.ayobaca.cc/${bookId}/${page === 0 ? 'cover' : page}.webp`;
+	};
 
 	let pageState = {
 		current: openPage ? parseInt(openPage) : 0,
@@ -22,47 +25,60 @@
 		prev: openPage ? parseInt(openPage) - 1 : -1
 	};
 
-	$: query = createQuery<Book>({
+	$: query = createQuery<BookContent | null>({
 		queryKey: ['book-content'],
 		queryFn: async () => {
-			const content = (await (
-				await fetch(`https://letsreadasia.org/api/v5/book/preview/language/${lang}/book/${id}`, {
-					cache: 'force-cache',
-					headers: {
-						'Cache-Control': 'max-age=29030400'
-					}
-				})
-			).json()) as Book;
+			const contents = await supabase
+				.from('books')
+				.select(
+					`
+					id,
+					masterBookId,
+					name,
+					authors,
+					coverImage,
+					book_details(
+						pageNum,
+						bookId,
+						content,
+						contentRaw
+					)`
+				)
+				.eq('masterBookId', id)
+				.single();
+			if (contents.error) throw contents.error;
 
-			bookContent.set(content);
+			const data = contents.data as BookContent | null;
+			if (data === null) throw new Error('Book not found');
+			bookContent.set(data.book_details.sort((a, b) => a.pageNum - b.pageNum));
 
-			return content;
+			return data;
 		},
 		enabled: browser
 	});
 
-	$: preloadImageUrls = $query.data?.pages.map((page) => page.imageUrl) ?? [];
+	$: preloadImageUrls =
+		[resolveImageUrl(id, 0)].concat($bookContent?.map((_, i) => resolveImageUrl(id, i + 1))) ?? [];
 	$: caption = true;
 	$: fontSize = 'md';
 
 	const navigateTo = (state: 'next' | 'prev') => {
 		const openPage = pageState.current + (state === 'next' ? 1 : -1);
 		pushState(`/read/${slug}/${id}/${openPage}?lang=${lang}`, {});
-		if ($query.data) {
-			if (state === 'next' && pageState.current !== $query.data.pages.length) {
-				pageState = {
-					next: pageState.current + 2,
-					current: openPage,
-					prev: pageState.current
-				};
-			}
-			if (state === 'prev' && pageState.current !== 0) {
-				pageState = {
-					next: pageState.current,
-					current: openPage,
-					prev: pageState.current - 2
-				};
-			}
+		console.log(pageState.current, $bookContent.length);
+		if (state === 'next' && pageState.current !== $bookContent.length - 1) {
+			pageState = {
+				next: pageState.current + 2,
+				current: openPage,
+				prev: pageState.current
+			};
+		}
+		if (state === 'prev' && pageState.current !== 0) {
+			pageState = {
+				next: pageState.current,
+				current: openPage,
+				prev: pageState.current - 2
+			};
 		}
 	};
 
@@ -87,9 +103,9 @@
 		}
 	};
 
-	const addToFavorite = (bookId: string) => {
-		if ($query.data !== undefined) {
-			const { name, authors, thumborCoverImageUrl } = $query.data;
+	const addToFavorite = () => {
+		if ($query.data !== undefined && $query.data !== null) {
+			const { name, authors, coverImage } = $query.data;
 			userPrefs.update((prefs) => {
 				return {
 					favoriteBooks: [
@@ -98,7 +114,7 @@
 							id: id,
 							slug: slug,
 							title: name,
-							cover: thumborCoverImageUrl,
+							cover: coverImage,
 							language: lang
 						}
 					]
@@ -110,7 +126,7 @@
 </script>
 
 <svelte:head>
-	<title>{$query.data?.name ?? 'Memuat...'}</title>
+	<title>{$query.data ? $query.data.name : 'Memuat...'}</title>
 
 	{#each preloadImageUrls as imageUrl}
 		<link rel="preload" as="image" href={imageUrl} />
@@ -169,12 +185,12 @@
 	<div class="absolute right-2 top-2">
 		<div class="flex flex-row items-center justify-center gap-2">
 			<Badge class="bg-green-700">
-				Hal. {pageState.current} dari {$query.data?.pages.length ?? '-'}
+				Hal. {pageState.current} dari {$bookContent ? $bookContent.length - 1 : '-'}
 			</Badge>
 			<Button
 				size="icon"
 				variant="outline"
-				on:click={() => $query.data && addToFavorite($query.data.masterBookId)}
+				on:click={addToFavorite}
 				class="bg-rose-600 shadow hover:bg-rose-700"
 			>
 				{#if isInFavoriteBooks}
@@ -195,24 +211,26 @@
 			<img
 				class="h-full object-contain"
 				id="cover-{slug}-{pageState.current}"
-				src={$bookContent.coverImageUrl}
-				alt={$bookContent.name}
+				src={preloadImageUrls[0]}
+				alt={'Sampul'}
 			/>
 		{:else}
 			<img
 				class="h-full object-contain"
 				id="content-{slug}-{pageState.current}"
-				src={$bookContent.pages[pageState.current - 1].imageUrl}
-				alt={$bookContent.pages[pageState.current - 1].alttext}
+				src={preloadImageUrls[pageState.current]}
+				alt={$bookContent[pageState.current].content}
 			/>
 		{/if}
 		<div class="absolute bottom-0 left-0 w-full text-center">
 			{#if pageState.current === 0}
 				<div class="mt-10 bg-gradient-to-b from-black/40 to-black/80 p-4">
 					<div>
-						<h1 class="mb-1 text-3xl font-semibold text-white">{$bookContent.name}</h1>
+						<h1 class="mb-1 text-3xl font-semibold text-white">
+							{$query.data ? $query.data.name : ''}
+						</h1>
 						<h4 class="text-md mb-4 text-white">
-							{$bookContent.collaboratorsByRole.AUTHOR.map((author) => author.name).join(', ')}
+							{$query.data ? $query.data.authors : ''}
 						</h4>
 					</div>
 					<Button variant="outline" size="lg" class="shadow" on:click={() => navigateTo('next')}
@@ -228,7 +246,7 @@
 				<div class="mx-auto flex max-w-xl items-center px-4 py-2">
 					<div class="mx-2 grow rounded bg-black bg-opacity-50 text-{fontSize} text-white">
 						{#if caption}
-							{@html $bookContent.pages[pageState.current - 1].extractedLongContentValue}
+							{@html $bookContent[pageState.current - 1].contentRaw}
 						{/if}
 					</div>
 				</div>
