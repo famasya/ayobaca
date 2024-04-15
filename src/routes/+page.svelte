@@ -137,7 +137,7 @@
 							>
 								<img
 									id={`${slug}-cover`}
-									src={result._coverimage}
+									src={`https://storage.ayobaca.cc/${result._masterbookid}/0.webp`}
 									alt={result._name}
 									height="400"
 									width="300"

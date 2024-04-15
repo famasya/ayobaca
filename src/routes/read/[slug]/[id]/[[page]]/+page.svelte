@@ -16,7 +16,7 @@
 	const lang = $page.url.searchParams.get('lang') ?? '6260074016145408';
 	const bookContent = writable<BookContent['book_details']>();
 	const resolveImageUrl = (bookId: string, page: number) => {
-		return `https://storage.ayobaca.cc/${bookId}/${page}.webp`;
+		return `https://storage.ayobaca.cc/${bookId}/${page === 0 ? 'cover' : page}.webp`;
 	};
 
 	let pageState = {
