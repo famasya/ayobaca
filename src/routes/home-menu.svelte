@@ -18,6 +18,10 @@
 				'Mempercepat proses pencarian',
 				'Buku di halaman awal sekarang ditampilkan secara acak'
 			]
+		},
+		{
+			date: '2024-04-15',
+			notes: ['Loading gambar kini lebih cepat']
 		}
 	];
 </script>

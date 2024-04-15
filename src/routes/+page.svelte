@@ -17,11 +17,6 @@
 	import type { BookSearchResult } from '../types';
 	import Header from './header.svelte';
 
-	// redirect to new site
-	if (browser && $page.url.href.includes('pages.dev')) {
-		window.location.href = 'https://ayobaca.cc';
-	}
-
 	$: search = createQuery<BookSearchResult[]>({
 		queryKey: ['search', searchTerm, cursor],
 		queryFn: async () => {
@@ -93,6 +88,11 @@
 	<title>Ayo Baca</title>
 </svelte:head>
 
+<div class="bg-green-800 py-2 text-center text-white">
+	Ayobaca kini dapat diakses di <a href="https://ayobaca.cc" class="rounded bg-green-700 px-2 py-1"
+		>ayobaca.cc</a
+	>
+</div>
 <div class="mx-auto mb-8 flex max-w-2xl flex-col px-2 py-4">
 	<Header />
 	<Input
