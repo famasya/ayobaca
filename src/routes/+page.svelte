@@ -2,7 +2,7 @@
 	import { browser } from '$app/environment';
 	import { pushState } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { supabase } from '$lib/common';
+	import { primeNumbers, supabase } from '$lib/common';
 	import * as Alert from '$lib/components/ui/alert';
 	import { Badge } from '$lib/components/ui/badge';
 	import Button from '$lib/components/ui/button/button.svelte';
@@ -17,12 +17,14 @@
 	import type { BookSearchResult } from '../types';
 	import Header from './header.svelte';
 
+	const randomNumber = primeNumbers.at(Math.floor(Math.random() * primeNumbers.length));
 	$: search = createQuery<BookSearchResult[]>({
 		queryKey: ['search', searchTerm, cursor],
 		queryFn: async () => {
-			const { data, error } = await supabase.rpc('get_books', {
+			const { data, error } = await supabase.rpc('get_books2', {
 				_limit: 24,
 				_randomize: searchTerm === '',
+				_random_number: randomNumber,
 				_search: searchTerm,
 				_offset: cursor * 24
 			});
