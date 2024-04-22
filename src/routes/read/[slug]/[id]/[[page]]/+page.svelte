@@ -28,10 +28,33 @@
 	$: query = createQuery<BookContent | null>({
 		queryKey: ['book-content'],
 		queryFn: async () => {
-			const contents = await supabase
-				.from('books')
-				.select(
-					`
+			let data: BookContent | null = null;
+			// if selected language is not Bahasa Indonesia, fetch directly from LetsReadAsia
+			if (lang !== '6260074016145408') {
+				const remoteContents = await (
+					await fetch(`https://letsreadasia.org/api/v5/book/preview/language/${lang}/book/${id}`)
+				).json();
+				if (remoteContents.error) throw remoteContents.error;
+
+				data = {
+					authors: remoteContents.collaboratorsByRole.AUTHOR.map((author: any) => author.name).join(
+						','
+					),
+					book_details: remoteContents.pages.map((page: any) => ({
+						pageNum: page.pageNum,
+						bookId: page.bookId,
+						content: page.extractedLongContentValue,
+						contentRaw: page.extractedLongContentValue
+					})),
+					coverImage: remoteContents.coverImageServingUrl,
+					masterBookId: remoteContents.masterBookId,
+					name: remoteContents.name
+				};
+			} else {
+				const contents = await supabase
+					.from('books')
+					.select(
+						`
 					id,
 					masterBookId,
 					name,
@@ -43,12 +66,13 @@
 						content,
 						contentRaw
 					)`
-				)
-				.eq('masterBookId', id)
-				.single();
-			if (contents.error) throw contents.error;
+					)
+					.eq('masterBookId', id)
+					.single();
+				if (contents.error) throw contents.error;
+				data = contents.data as BookContent;
+			}
 
-			const data = contents.data as BookContent | null;
 			if (data === null) throw new Error('Book not found');
 			bookContent.set(data.book_details.sort((a, b) => a.pageNum - b.pageNum));
 
